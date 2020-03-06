@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Weed Growing App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+    <div class="bg">
+
+        <h1>Weed Grow</h1>
+        <div class="soil">
+            <p>Soil Humidity Display Chart</p>
+            <div id="chart-humidity" class="container">
+            </div>
+        </div>
+
+        <p><a onclick="turnON()"><button class="button">ON</button></a></p>
+        <p><a onclick="turnOFF()"><button class="button button2">OFF</button></a></p>
+    </div>
+
+    <!--JavaScript at end of body for optimized loading-->
+    <script src="jquery-3.4.1.min.js"></script>
+    <script src="highcharts.js"></script>
+    <script>
+        var chartH = new Highcharts.Chart({
+            chart: {
+                renderTo: 'chart-humidity'
+            },
+            title: {
+                text: 'Humidity'
+            },
+            series: [{
+                showInLegend: false,
+                data: []
+            }],
+            plotOptions: {
+                line: {
+                    animation: false,
+                    dataLabels: {
+                        enabled: true
+                    }
+                }
+            },
+            xAxis: {
+                type: 'datetime',
+                dateTimeLabelFormats: {
+                    second: '%H:%M:%S'
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Humidity (%)'
+                }
+            },
+            credits: {
+                enabled: false
+            }
+        });
+        setInterval(function() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var x = (new Date()).getTime(),
+                        y = parseFloat(this.responseText);
+                    //console.log(this.responseText);
+                    if (chartH.series[0].data.length > 40) {
+                        chartH.series[0].addPoint([x, y], true, true, true);
+                    } else {
+                        chartH.series[0].addPoint([x, y], true, false, true);
+                    }
+                }
+            };
+            xhttp.open("GET", "/humidity", true);
+            xhttp.send();
+        }, 30000);
+
+
+        function turnON() {
+            $.get("/on", function(data) {
+                console.log(data);
+            });
+        }
+
+        function turnOFF() {
+            $.get("/off", function(data) {
+                console.log(data);
+            });
+        }
+
+    </script>
+</body>
+
+
+</html>
